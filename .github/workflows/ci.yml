@@ -60,6 +60,14 @@ jobs:
       - name: Install dependencies
         working-directory: preview
         run: npm install
+      - name: Upload resolved npm lockfile for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-preview-lockfile
+          path: preview/package-lock.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Fail on high or critical dependency vulnerabilities
         working-directory: preview
         run: npm audit --audit-level=high
