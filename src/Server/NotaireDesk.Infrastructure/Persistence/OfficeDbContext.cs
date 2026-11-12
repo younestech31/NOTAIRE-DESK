@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NotaireDesk.Domain.Contracts;
 using NotaireDesk.Domain.Parties;
 using NotaireDesk.Domain.Properties;
+using NotaireDesk.Domain.Security;
 
 namespace NotaireDesk.Infrastructure.Persistence;
 
@@ -15,11 +16,38 @@ public sealed class OfficeDbContext(DbContextOptions<OfficeDbContext> options) :
     public DbSet<PropertyRecord> Properties => Set<PropertyRecord>();
     public DbSet<NotarialContract> Contracts => Set<NotarialContract>();
     public DbSet<ContractGenerationSnapshot> ContractGenerationSnapshots => Set<ContractGenerationSnapshot>();
+    public DbSet<OfficeUser> Users => Set<OfficeUser>();
+    public DbSet<OfficeRole> Roles => Set<OfficeRole>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("office");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OfficeDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        EnforceAppendOnlyAudit();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        EnforceAppendOnlyAudit();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void EnforceAppendOnlyAudit()
+    {
+        var changedAuditEvents = ChangeTracker.Entries<AuditEvent>()
+            .Where(entry => entry.State is EntityState.Modified or EntityState.Deleted)
+            .ToArray();
+        if (changedAuditEvents.Length > 0)
+            throw new InvalidOperationException("Audit events are append-only and cannot be modified or deleted.");
     }
 }

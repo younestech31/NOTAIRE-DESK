@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   windows-build-test:
-    name: Windows desktop build and tests
+    name: Windows build, tests and migration review
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,15 +29,113 @@ jobs:
         run: dotnet build NOTAIRE-DESK.sln --configuration Release --no-restore
       - name: Test
         run: dotnet test NOTAIRE-DESK.sln --configuration Release --no-build --logger "trx;LogFileName=notaire-desk-tests.trx"
+      - name: Restore EF tooling
+        run: dotnet tool restore
+      - name: Scaffold, protect and validate the initial office migration
+        shell: pwsh
+        run: |
+          $migrationDirectory = "src/Server/NotaireDesk.Infrastructure/Persistence/Migrations"
+          $initialMigration = Get-ChildItem $migrationDirectory -Filter "*_InitialOfficeDatabase.cs" -ErrorAction SilentlyContinue
+          if (-not $initialMigration) {
+            dotnet ef migrations add InitialOfficeDatabase --project src/Server/NotaireDesk.Infrastructure --startup-project src/Server/NotaireDesk.Api --context OfficeDbContext --output-dir Persistence/Migrations --configuration Release --no-build
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+          $migrationSource = Get-ChildItem $migrationDirectory -Filter "*_InitialOfficeDatabase.cs" | Select-Object -First 1
+          if (-not $migrationSource) {
+            throw "InitialOfficeDatabase migration was not generated."
+          }
+
+          $migrationContent = Get-Content -Path $migrationSource.FullName -Raw
+          if (-not $migrationContent.Contains("trg_audit_events_no_update_delete")) {
+            $downMarker = "        protected override void Down(MigrationBuilder migrationBuilder)"
+            $downIndex = $migrationContent.IndexOf($downMarker, [StringComparison]::Ordinal)
+            if ($downIndex -lt 0) { throw "Could not locate the migration Down method." }
+
+            $upCloseIndex = $migrationContent.LastIndexOf("        }", $downIndex)
+            if ($upCloseIndex -lt 0) { throw "Could not locate the migration Up method boundary." }
+
+            $upSql = @'
+                      migrationBuilder.Sql(@"
+          CREATE OR REPLACE FUNCTION office.reject_audit_event_mutation()
+          RETURNS trigger LANGUAGE plpgsql AS $audit$
+          BEGIN
+              RAISE EXCEPTION 'office.audit_events is append-only' USING ERRCODE = '55000';
+          END;
+          $audit$;
+
+          CREATE TRIGGER trg_audit_events_no_update_delete
+              BEFORE UPDATE OR DELETE ON office.audit_events
+              FOR EACH ROW EXECUTE FUNCTION office.reject_audit_event_mutation();
+
+          CREATE TRIGGER trg_audit_events_no_truncate
+              BEFORE TRUNCATE ON office.audit_events
+              FOR EACH STATEMENT EXECUTE FUNCTION office.reject_audit_event_mutation();
+          ");
+          '@
+            $migrationContent = $migrationContent.Insert($upCloseIndex, $upSql + [Environment]::NewLine)
+
+            $downIndex = $migrationContent.IndexOf($downMarker, [StringComparison]::Ordinal)
+            $downOpenIndex = $migrationContent.IndexOf("{", $downIndex, [StringComparison]::Ordinal)
+            if ($downOpenIndex -lt 0) { throw "Could not locate the Down method body." }
+
+            $downSql = @'
+
+                      migrationBuilder.Sql(@"
+          DROP TRIGGER IF EXISTS trg_audit_events_no_truncate ON office.audit_events;
+          DROP TRIGGER IF EXISTS trg_audit_events_no_update_delete ON office.audit_events;
+          DROP FUNCTION IF EXISTS office.reject_audit_event_mutation();
+          ");
+          '@
+            $migrationContent = $migrationContent.Insert($downOpenIndex + 1, $downSql)
+            Set-Content -Path $migrationSource.FullName -Value $migrationContent -Encoding utf8
+          }
+
+          # The migration was scaffolded after the first build. Rebuild so EF tools,
+          # API and bootstrap packages compile the migration into the infrastructure assembly.
+          dotnet build NOTAIRE-DESK.sln --configuration Release --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          New-Item -ItemType Directory -Force -Path artifacts/database | Out-Null
+          dotnet ef migrations script --project src/Server/NotaireDesk.Infrastructure --startup-project src/Server/NotaireDesk.Api --context OfficeDbContext --configuration Release --output artifacts/database/office-schema.sql
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Copy-Item "$migrationDirectory/*.cs" artifacts/database/
+          Copy-Item "deployment/Server/office-runtime-grants.sql" artifacts/database/
+
       - name: Publish Windows x64 desktop
         run: dotnet publish src/Desktop/NotaireDesk.App/NotaireDesk.App.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/windows-x64
-      - name: Add installation notes
+      - name: Add desktop installation notes
         run: Copy-Item deployment/Client/README-FIRST.txt artifacts/windows-x64/README-FIRST.txt
-      - name: Upload Windows artifact
+      - name: Publish Office LAN API
+        run: dotnet publish src/Server/NotaireDesk.Api/NotaireDesk.Api.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/server-api
+      - name: Publish first-run bootstrap utility
+        run: dotnet publish src/Tools/NotaireDesk.Bootstrap/NotaireDesk.Bootstrap.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/bootstrap
+      - name: Add server deployment instructions
+        run: Copy-Item deployment/Server/README.md artifacts/server-api/README-DEPLOYMENT.md
+      - name: Upload Windows desktop
         uses: actions/upload-artifact@v4
         with:
           name: notaire-desk-windows-x64
           path: artifacts/windows-x64/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload server and bootstrap packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-office-server-x64
+          path: |
+            artifacts/server-api/
+            artifacts/bootstrap/
+            deployment/Server/bootstrap-admin.ps1
+            deployment/Server/office-runtime-grants.sql
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload database migration review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-office-database-migrations
+          path: artifacts/database/
           if-no-files-found: error
           retention-days: 14
       - name: Upload test results
