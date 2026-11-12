@@ -7,5 +7,9 @@
     <ProjectReference Include="../NotaireDesk.Domain/NotaireDesk.Domain.csproj" />
     <ProjectReference Include="../NotaireDesk.Infrastructure/NotaireDesk.Infrastructure.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
