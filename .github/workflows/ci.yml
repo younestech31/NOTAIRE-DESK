@@ -31,6 +31,8 @@ jobs:
         run: dotnet test NOTAIRE-DESK.sln --configuration Release --no-build --logger "trx;LogFileName=notaire-desk-tests.trx"
       - name: Publish Windows x64 desktop
         run: dotnet publish src/Desktop/NotaireDesk.App/NotaireDesk.App.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/windows-x64
+      - name: Add installation notes
+        run: Copy-Item deployment/Client/README-FIRST.txt artifacts/windows-x64/README-FIRST.txt
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
@@ -58,6 +60,17 @@ jobs:
       - name: Install dependencies
         working-directory: preview
         run: npm install
+      - name: Upload resolved npm lockfile for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-preview-lockfile
+          path: preview/package-lock.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Fail on high or critical dependency vulnerabilities
+        working-directory: preview
+        run: npm audit --audit-level=high
       - name: Build static preview
         working-directory: preview
         run: npm run build
@@ -68,30 +81,3 @@ jobs:
           path: preview/out/
           if-no-files-found: error
           retention-days: 14
-      - name: Install Vercel CLI
-        if: github.event_name == 'pull_request' && vars.VERCEL_PREVIEW_ENABLED == 'true'
-        run: npm install --global vercel@latest
-      - name: Pull Vercel preview environment
-        if: github.event_name == 'pull_request' && vars.VERCEL_PREVIEW_ENABLED == 'true'
-        working-directory: preview
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
-      - name: Build Vercel preview
-        if: github.event_name == 'pull_request' && vars.VERCEL_PREVIEW_ENABLED == 'true'
-        working-directory: preview
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel build --token="$VERCEL_TOKEN"
-      - name: Deploy Vercel preview
-        if: github.event_name == 'pull_request' && vars.VERCEL_PREVIEW_ENABLED == 'true'
-        working-directory: preview
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel deploy --prebuilt --token="$VERCEL_TOKEN"
