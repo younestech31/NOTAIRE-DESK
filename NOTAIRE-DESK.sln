@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Tests", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Documents.Abstractions", "src\Modules\Documents\NotaireDesk.Documents.Abstractions\NotaireDesk.Documents.Abstractions.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1005}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Infrastructure", "src\Server\NotaireDesk.Infrastructure\NotaireDesk.Infrastructure.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1006}"
+EndProject
 Global
  GlobalSection(SolutionConfigurationPlatforms) = preSolution
   Debug|Any CPU = Debug|Any CPU
