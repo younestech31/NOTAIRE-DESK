@@ -1,0 +1,34 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Domain", "src\Server\NotaireDesk.Domain\NotaireDesk.Domain.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Api", "src\Server\NotaireDesk.Api\NotaireDesk.Api.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.App", "src\Desktop\NotaireDesk.App\NotaireDesk.App.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Tests", "tests\NotaireDesk.Tests\NotaireDesk.Tests.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}"
+EndProject
+Global
+ GlobalSection(SolutionConfigurationPlatforms) = preSolution
+  Debug|Any CPU = Debug|Any CPU
+  Release|Any CPU = Release|Any CPU
+ EndGlobalSection
+ GlobalSection(ProjectConfigurationPlatforms) = postSolution
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1001}.Release|Any CPU.Build.0 = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1002}.Release|Any CPU.Build.0 = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Release|Any CPU.Build.0 = Release|Any CPU
+ EndGlobalSection
+EndGlobal
