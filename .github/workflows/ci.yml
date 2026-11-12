@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   windows-build-test:
-    name: Windows desktop build and tests
+    name: Windows build, tests and migration review
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,15 +29,53 @@ jobs:
         run: dotnet build NOTAIRE-DESK.sln --configuration Release --no-restore
       - name: Test
         run: dotnet test NOTAIRE-DESK.sln --configuration Release --no-build --logger "trx;LogFileName=notaire-desk-tests.trx"
+      - name: Restore EF tooling
+        run: dotnet tool restore
+      - name: Scaffold and validate the initial office migration
+        shell: pwsh
+        run: |
+          $migrationDirectory = "src/Server/NotaireDesk.Infrastructure/Persistence/Migrations"
+          $initialMigration = Get-ChildItem $migrationDirectory -Filter "*_InitialOfficeDatabase.cs" -ErrorAction SilentlyContinue
+          if (-not $initialMigration) {
+            dotnet ef migrations add InitialOfficeDatabase --project src/Server/NotaireDesk.Infrastructure --startup-project src/Server/NotaireDesk.Api --context OfficeDbContext --output-dir Persistence/Migrations --configuration Release --no-build
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          New-Item -ItemType Directory -Force -Path artifacts/database | Out-Null
+          dotnet ef migrations script --project src/Server/NotaireDesk.Infrastructure --startup-project src/Server/NotaireDesk.Api --context OfficeDbContext --configuration Release --no-build --output artifacts/database/office-schema.sql
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item "$migrationDirectory/*.cs" artifacts/database/
       - name: Publish Windows x64 desktop
         run: dotnet publish src/Desktop/NotaireDesk.App/NotaireDesk.App.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/windows-x64
-      - name: Add installation notes
+      - name: Add desktop installation notes
         run: Copy-Item deployment/Client/README-FIRST.txt artifacts/windows-x64/README-FIRST.txt
-      - name: Upload Windows artifact
+      - name: Publish Office LAN API
+        run: dotnet publish src/Server/NotaireDesk.Api/NotaireDesk.Api.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/server-api
+      - name: Publish first-run bootstrap utility
+        run: dotnet publish src/Tools/NotaireDesk.Bootstrap/NotaireDesk.Bootstrap.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/bootstrap
+      - name: Add server deployment instructions
+        run: Copy-Item deployment/Server/README.md artifacts/server-api/README-DEPLOYMENT.md
+      - name: Upload Windows desktop
         uses: actions/upload-artifact@v4
         with:
           name: notaire-desk-windows-x64
           path: artifacts/windows-x64/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload server and bootstrap packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-office-server-x64
+          path: |
+            artifacts/server-api/
+            artifacts/bootstrap/
+            deployment/Server/bootstrap-admin.ps1
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload database migration review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-office-database-migrations
+          path: artifacts/database/
           if-no-files-found: error
           retention-days: 14
       - name: Upload test results
