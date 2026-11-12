@@ -1,0 +1,28 @@
+<Window x:Class="NotaireDesk.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NOTAIRE DESK" Height="760" Width="1240" MinHeight="640" MinWidth="980" WindowStartupLocation="CenterScreen" FlowDirection="RightToLeft" Background="#F3F6F9">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Background="{StaticResource BrandNavy}" Padding="24,18">
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel><TextBlock Text="NOTAIRE DESK" Foreground="White" FontSize="23" FontWeight="Bold"/><TextBlock Text="منصة العمل المكتبي للتوثيق" Foreground="#C8D5E3" FontSize="13" Margin="0,5,0,0"/></StackPanel>
+        <Border Grid.Column="1" Background="#24435B" CornerRadius="14" Padding="14,7" VerticalAlignment="Center"><TextBlock Text="نسخة تطويرية · Development" Foreground="White"/></Border>
+      </Grid>
+    </Border>
+    <Grid Margin="24"><Grid.ColumnDefinitions><ColumnDefinition Width="250"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Border Background="White" CornerRadius="12" Padding="16" Margin="0,0,18,0">
+        <StackPanel><TextBlock Text="مساحة العمل" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,18"/>
+          <Button Content="المستندات" Padding="12" Margin="0,3" HorizontalContentAlignment="Right"/>
+          <Button Content="الأطراف" Padding="12" Margin="0,3" HorizontalContentAlignment="Right"/>
+          <Button Content="العقارات" Padding="12" Margin="0,3" HorizontalContentAlignment="Right"/>
+          <Button Content="القوالب" Padding="12" Margin="0,3" HorizontalContentAlignment="Right"/>
+          <Button Content="إدارة المكتب" Padding="12" Margin="0,3" HorizontalContentAlignment="Right"/>
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Background="White" CornerRadius="12" Padding="30">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="560">
+          <TextBlock Text="مرحباً بك في NOTAIRE DESK" FontSize="28" FontWeight="Bold" TextAlignment="Center"/>
+          <TextBlock Text="هذه القشرة الأولية للتطبيق. ستُبنى وحدات تحرير العقود وإدارة البيانات بعد اعتماد محرك المستندات واختبار توافقه." FontSize="15" Foreground="#526174" TextWrapping="Wrap" TextAlignment="Center" Margin="0,16,0,24"/>
+          <Border Background="#E8F4F2" CornerRadius="8" Padding="16"><TextBlock Text="بيانات المكتب والعقود والملفات تبقى داخل خادم المؤسسة وشبكتها المحلية." Foreground="#115E59" TextWrapping="Wrap" TextAlignment="Center"/></Border>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</Window>

@@ -1,0 +1,99 @@
+name: NOTAIRE DESK CI
+
+on:
+  push:
+    branches: ["setup/**", "feature/**", "fix/**", "chore/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notaire-desk-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-build-test:
+    name: Windows desktop build and tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore NOTAIRE-DESK.sln
+      - name: Build
+        run: dotnet build NOTAIRE-DESK.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test NOTAIRE-DESK.sln --configuration Release --no-build --logger "trx;LogFileName=notaire-desk-tests.trx"
+      - name: Publish Windows x64 desktop
+        run: dotnet publish src/Desktop/NotaireDesk.App/NotaireDesk.App.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/windows-x64
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-windows-x64
+          path: artifacts/windows-x64/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-test-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore
+          retention-days: 14
+
+  web-preview-build:
+    name: Web preview build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: preview/package.json
+      - name: Install dependencies
+        working-directory: preview
+        run: npm install
+      - name: Build static preview
+        working-directory: preview
+        run: npm run build
+      - name: Upload web preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: notaire-desk-web-preview
+          path: preview/out/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Install Vercel CLI
+        if: github.event_name == 'pull_request' && secrets.VERCEL_TOKEN != ''
+        run: npm install --global vercel@latest
+      - name: Pull Vercel preview environment
+        if: github.event_name == 'pull_request' && secrets.VERCEL_TOKEN != ''
+        working-directory: preview
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+      - name: Build Vercel preview
+        if: github.event_name == 'pull_request' && secrets.VERCEL_TOKEN != ''
+        working-directory: preview
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token="$VERCEL_TOKEN"
+      - name: Deploy Vercel preview
+        if: github.event_name == 'pull_request' && secrets.VERCEL_TOKEN != ''
+        working-directory: preview
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --token="$VERCEL_TOKEN"
