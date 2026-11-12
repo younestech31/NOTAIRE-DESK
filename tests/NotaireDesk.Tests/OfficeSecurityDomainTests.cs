@@ -69,12 +69,23 @@ public sealed class OfficeSecurityDomainTests
         var user = CreateUser();
         var roleId = Guid.NewGuid();
 
-        user.ReplaceRoles([roleId]);
+        user.ReplaceRoles([roleId], CreatedAt.AddMinutes(1));
         Assert.Single(user.Roles);
 
-        Assert.Throws<ArgumentException>(() => user.ReplaceRoles([roleId, roleId]));
-        Assert.Throws<ArgumentException>(() => user.ReplaceRoles([Guid.Empty]));
+        Assert.Throws<ArgumentException>(() => user.ReplaceRoles([roleId, roleId], CreatedAt.AddMinutes(2)));
+        Assert.Throws<ArgumentException>(() => user.ReplaceRoles([Guid.Empty], CreatedAt.AddMinutes(2)));
         Assert.Single(user.Roles);
+    }
+
+    [Fact]
+    public void ReplacingRolesUpdatesTheUserTimestamp()
+    {
+        var user = CreateUser();
+        var changedAt = CreatedAt.AddMinutes(5);
+
+        user.ReplaceRoles([Guid.NewGuid()], changedAt);
+
+        Assert.Equal(changedAt, user.UpdatedAt);
     }
 
     [Fact]

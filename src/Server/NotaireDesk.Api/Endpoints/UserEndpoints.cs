@@ -109,7 +109,7 @@ public static class UserEndpoints
         var now = DateTimeOffset.UtcNow;
         var user = OfficeUser.Create(username, nameAr, request.DisplayNameFr, "placeholder", now);
         user.ReplacePasswordHash(passwordHasher.HashPassword(user, request.InitialPassword!), now);
-        user.ReplaceRoles(request.RoleIds!);
+        user.ReplaceRoles(request.RoleIds!, DateTimeOffset.UtcNow);
 
         db.Users.Add(user);
         audit.Add("users.created", "OfficeUser", user.Id.ToString("D"), AuditOutcome.Succeeded,

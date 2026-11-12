@@ -66,7 +66,7 @@ var user = OfficeUser.Create(username, nameAr, nameFr, "placeholder", now);
 var hasher = new PasswordHasher<OfficeUser>(
     Options.Create(new PasswordHasherOptions { IterationCount = 310_000 }));
 user.ReplacePasswordHash(hasher.HashPassword(user, password), now);
-user.ReplaceRoles([adminRole.Id]);
+user.ReplaceRoles([adminRole.Id], now);
 
 db.Users.Add(user);
 db.AuditEvents.Add(AuditEvent.Create(

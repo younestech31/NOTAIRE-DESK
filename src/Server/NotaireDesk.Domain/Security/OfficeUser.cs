@@ -138,7 +138,7 @@ public sealed class OfficeUser
         Touch(changedAt);
     }
 
-    public void ReplaceRoles(IEnumerable<Guid> roleIds)
+    public void ReplaceRoles(IEnumerable<Guid> roleIds, DateTimeOffset changedAt)
     {
         ArgumentNullException.ThrowIfNull(roleIds);
         var requestedRoleIds = roleIds.ToArray();
@@ -146,9 +146,14 @@ public sealed class OfficeUser
         if (uniqueRoleIds.Any(x => x == Guid.Empty) || uniqueRoleIds.Length != requestedRoleIds.Length)
             throw new ArgumentException("Role ids must be unique and non-empty.", nameof(roleIds));
 
+        var timestamp = changedAt.ToUniversalTime();
+        if (timestamp < CreatedAt)
+            throw new ArgumentOutOfRangeException(nameof(changedAt), "Change time cannot precede creation time.");
+
         _roles.Clear();
         foreach (var roleId in uniqueRoleIds)
             _roles.Add(new OfficeUserRole(Id, roleId));
+        UpdatedAt = timestamp;
     }
 
     private void Touch(DateTimeOffset changedAt)
