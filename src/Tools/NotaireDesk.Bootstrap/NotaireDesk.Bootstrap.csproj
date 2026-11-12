@@ -5,8 +5,8 @@
     <RootNamespace>NotaireDesk.Bootstrap</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Server/NotaireDesk.Domain/NotaireDesk.Domain.csproj" />
-    <ProjectReference Include="../../src/Server/NotaireDesk.Infrastructure/NotaireDesk.Infrastructure.csproj" />
+    <ProjectReference Include="../../Server/NotaireDesk.Domain/NotaireDesk.Domain.csproj" />
+    <ProjectReference Include="../../Server/NotaireDesk.Infrastructure/NotaireDesk.Infrastructure.csproj" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.14" />
   </ItemGroup>
 </Project>
