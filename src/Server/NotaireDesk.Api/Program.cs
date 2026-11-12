@@ -3,7 +3,8 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 // Bind to the office LAN only at deployment; do not expose this API publicly.
-app.MapGet("/", () => Results.Ok(new {
+app.MapGet("/", () => Results.Ok(new
+{
     application = "NOTAIRE-DESK",
     service = "Office LAN API",
     status = "development",
@@ -12,4 +13,6 @@ app.MapGet("/", () => Results.Ok(new {
 app.MapHealthChecks("/health");
 app.Run();
 
-public partial class Program;
+public partial class Program
+{
+}
