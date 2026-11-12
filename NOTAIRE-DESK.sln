@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.App", "src\Desk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Tests", "tests\NotaireDesk.Tests\NotaireDesk.Tests.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotaireDesk.Documents.Abstractions", "src\Modules\Documents\NotaireDesk.Documents.Abstractions\NotaireDesk.Documents.Abstractions.csproj", "{B9F99C11-3C16-4E22-A0D9-2B0D3DFA1005}"
+EndProject
 Global
  GlobalSection(SolutionConfigurationPlatforms) = preSolution
   Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
   {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Debug|Any CPU.Build.0 = Debug|Any CPU
   {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Release|Any CPU.ActiveCfg = Release|Any CPU
   {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1004}.Release|Any CPU.Build.0 = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+  {B9F99C11-3C16-4E22-A0D9-2B0D3DFA1005}.Release|Any CPU.Build.0 = Release|Any CPU
  EndGlobalSection
 EndGlobal

@@ -31,6 +31,8 @@ jobs:
         run: dotnet test NOTAIRE-DESK.sln --configuration Release --no-build --logger "trx;LogFileName=notaire-desk-tests.trx"
       - name: Publish Windows x64 desktop
         run: dotnet publish src/Desktop/NotaireDesk.App/NotaireDesk.App.csproj --configuration Release --runtime win-x64 --self-contained false --output artifacts/windows-x64
+      - name: Add installation notes
+        run: Copy-Item deployment/Client/README-FIRST.txt artifacts/windows-x64/README-FIRST.txt
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
