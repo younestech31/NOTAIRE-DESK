@@ -12,8 +12,8 @@ GitHub → Actions → latest **NOTAIRE DESK CI** run → Artifacts:
 
 The initial Windows package is framework-dependent; install .NET 10 Desktop Runtime on the test PC.
 
-## Vercel
-Set repository Actions secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` and create a Vercel project with Root Directory `preview`. PR deploy is skipped if token is absent. Preview is synthetic-data-only; never add office API URLs, credentials or real documents.
+## Vercel preview
+Create a Vercel project with Root Directory `preview`. Configure repository Actions secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` and repository Actions variable `VERCEL_PREVIEW_ENABLED=true`. PR deployment is skipped until that variable is enabled. Preview is synthetic-data-only; never add office API URLs, credentials or real documents.
 
 ## Local prerequisites
 Windows 10/11 x64 for WPF, .NET 10 SDK, Node.js 22+ for preview. PostgreSQL deployment is added after schema and migrations are designed.
