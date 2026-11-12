@@ -1,4 +1,6 @@
 using NotaireDesk.Domain;
+using Xunit;
+
 namespace NotaireDesk.Tests;
 public sealed class OfficeIdentityTests
 {
