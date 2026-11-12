@@ -20,22 +20,25 @@ public sealed class NotarialContractConfiguration : IEntityTypeConfiguration<Not
         builder.HasIndex(x => x.Reference).IsUnique();
         builder.HasIndex(x => x.Status);
 
-        builder.HasMany<ContractPartyReference>("_parties")
+        builder.HasMany<ContractPartyReference>(nameof(NotarialContract.Parties))
             .WithOne()
             .HasForeignKey("ContractId")
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation("_parties").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(nameof(NotarialContract.Parties))
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany<ContractPropertyReference>("_properties")
+        builder.HasMany<ContractPropertyReference>(nameof(NotarialContract.Properties))
             .WithOne()
             .HasForeignKey("ContractId")
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation("_properties").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(nameof(NotarialContract.Properties))
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany<ContractGenerationSnapshot>("_generations")
+        builder.HasMany<ContractGenerationSnapshot>(nameof(NotarialContract.Generations))
             .WithOne()
             .HasForeignKey(x => x.ContractId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation("_generations").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(nameof(NotarialContract.Generations))
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

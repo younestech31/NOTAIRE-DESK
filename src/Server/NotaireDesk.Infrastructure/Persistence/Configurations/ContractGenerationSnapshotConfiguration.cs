@@ -19,16 +19,18 @@ public sealed class ContractGenerationSnapshotConfiguration : IEntityTypeConfigu
         builder.Property(x => x.GeneratedAt).IsRequired();
         builder.HasIndex(x => new { x.ContractId, x.GenerationNumber }).IsUnique();
 
-        builder.HasMany<PartyGenerationSnapshot>("_parties")
+        builder.HasMany<PartyGenerationSnapshot>(nameof(ContractGenerationSnapshot.Parties))
             .WithOne()
             .HasForeignKey("SnapshotId")
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation("_parties").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(nameof(ContractGenerationSnapshot.Parties))
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany<PropertyGenerationSnapshot>("_properties")
+        builder.HasMany<PropertyGenerationSnapshot>(nameof(ContractGenerationSnapshot.Properties))
             .WithOne()
             .HasForeignKey("SnapshotId")
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation("_properties").UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(nameof(ContractGenerationSnapshot.Properties))
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
