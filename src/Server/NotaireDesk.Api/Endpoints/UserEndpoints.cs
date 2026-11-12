@@ -166,7 +166,7 @@ public static class UserEndpoints
                 return Results.Conflict(new { error = "cannot_remove_last_office_administrator" });
         }
 
-        user.ReplaceRoles(request.RoleIds!);
+        user.ReplaceRoles(request.RoleIds!, DateTimeOffset.UtcNow);
         await RevokeAllSessionsAsync(db, user.Id, DateTimeOffset.UtcNow, cancellationToken);
         audit.Add("users.roles.replaced", "OfficeUser", user.Id.ToString("D"),
             AuditOutcome.Succeeded, $"role_count:{request.RoleIds!.Length}");
